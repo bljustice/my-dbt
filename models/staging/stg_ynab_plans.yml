@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_ynab_plans
+    description: "Staging table for YNAB plans"    
+    columns:
+      - name: stg_ynab_plans_key
+        description: "The primary key of the stg_ynab_plans table."
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: date
+        description: "The month linked to the category record."
+        data_type: date
+      - name: category_group
+        description: "The category group of the plan."
+        data_type: varchar
+      - name: category
+        description: "The category of the plan."
+        data_type: varchar
+      - name: assigned_amount_usd
+        description: "The amount of money that was assigned to the category in USD"
+        data_type: number
+      - name: activity_amount_usd
+        description: "The amount of money that was gained or spent on the category in USD"
+        data_type: number
+      - name: available_amount_usd
+        description: "The amount of money available to spend on the category in USD"
+        data_type: number
