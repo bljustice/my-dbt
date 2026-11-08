@@ -29,3 +29,6 @@ models:
     staging:
       +schema: staging
       +tags: [staging]
+    mart:
+      +schema: mart
+      +tags: [mart]
