@@ -36,10 +36,10 @@ models:
         data_type: varchar
       - name: inflow_usd
         description: "The amount of money that was received in USD"
-        data_type: number
+        data_type: decimal(38,3)
       - name: outflow_usd
         description: "The amount of money that was paid in USD"
-        data_type: number
+        data_type: decimal(38,3)
 
 
 
