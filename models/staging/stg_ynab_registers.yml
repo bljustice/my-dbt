@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: stg_ynab_registers
+    description: "Staging table for YNAB registers"    
+    columns:
+      - name: stg_ynab_registers_key
+        description: "The primary key of the stg_ynab_registers table."
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: date
+        description: "The date of the register."
+        data_type: date
+      - name: account_name
+        description: "The account name of the register."
+        data_type: varchar
+      - name: category_group
+        description: "The category group of the register."
+        data_type: varchar
+      - name: category
+        description: "The category of the register."
+        data_type: varchar
+      - name: flag
+        description: "The flag added to the register"
+        data_type: varchar
+      - name: payee
+        description: "The entity linked to the exchange record"
+        data_type: varchar
+      - name: memo
+        description: "The memo linked to the register"
+        data_type: varchar
+      - name: cleared
+        description: "Whether or not the line item was cleared"
+        data_type: varchar
+      - name: inflow_usd
+        description: "The amount of money that was received in USD"
+        data_type: number
+      - name: outflow_usd
+        description: "The amount of money that was paid in USD"
+        data_type: number
+
+
+

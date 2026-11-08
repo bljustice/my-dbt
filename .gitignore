@@ -4,5 +4,7 @@ dbt_packages/
 logs/
 .DS_Store
 .env
-
+datamart.duckdb
+.venv
 .user.yml
+dbt_internal_packages/
