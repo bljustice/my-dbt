@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: dim_ynab_account
+    description: "Type 1 dimension table for YNAB accounts"    
+    columns:
+      - name: dim_ynab_account_key
+        description: "The surrogate key of YNAB account dimension"
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: account_name
+        description: "The name of the account"
+        data_type: varchar
+      - name: category_group
+
+unit_tests:
+  - name: test_account_name_deduplication
+    model: dim_ynab_account
+    description: "Verify duplicate account names are removed"
+    given:
+      - input: ref('stg_ynab_registers')
+        rows: # Indented 2 spaces further under the input block
+          - { account_name: "Mortgage" }
+          - { account_name: "Mortgage" }
+          - { account_name: "Emergency" }
+          - { account_name: "Emergency" }
+    expect: # Brought back out to line up evenly with 'given'
+      rows:
+        - { dim_ynab_account_key: '59fc519256027c0b90a627d1688c0975', account_name: "Mortgage" }
+        - { dim_ynab_account_key: 'a3fa706f20bc0b7858b7ae6932261940', account_name: "Emergency" }
