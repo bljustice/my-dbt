@@ -13,10 +13,14 @@ cleaned_cte as (
     select
         coalesce(date, '1900-01-01')::date as date
         , coalesce(account, 'Unknown') as account_name
-        , coalesce(category_group, 'Unknown') as category_group
-        , coalesce(category, 'Unknown') as category
+        , coalesce(category_group, 'Unknown') as category_group_name
+        , coalesce(category, 'Unknown') as category_name
         , coalesce(flag, 'Unknown') as flag
-        , coalesce(payee, 'Unknown') as payee
+        , coalesce(case 
+            when regexp_matches(payee, '^[★\*\\s\\.-]+$') then 'Unknown'
+            else payee
+            end 
+            , 'Unknown') as payee_name
         , coalesce(memo, 'Unknown') as memo
         , coalesce(cleared, 'Unknown') as cleared
         , replace(inflow, '$', '')::numeric as inflow_usd
@@ -29,10 +33,10 @@ agg_cte as (
     select
         date
         , account_name
-        , category_group
-        , category
+        , category_group_name
+        , category_name
         , flag
-        , payee
+        , payee_name
         , memo
         , cleared
         , sum(inflow_usd) as inflow_usd
@@ -44,7 +48,7 @@ agg_cte as (
 
 final_cte as (
     select 
-        {{ dbt_utils.generate_surrogate_key(["date", "account_name", "category_group", "category", "payee", "memo", "cleared"]) }} as stg_ynab_registers_key
+        {{ dbt_utils.generate_surrogate_key(["date", "account_name", "category_group_name", "category_name", "payee_name", "memo", "cleared"]) }} as stg_ynab_registers_key
         , *
     from
         agg_cte

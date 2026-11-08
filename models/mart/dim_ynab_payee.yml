@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: dim_ynab_payee
+    description: "Type 1 dimension table for YNAB payees"    
+    columns:
+      - name: dim_ynab_payee_key
+        description: "The surrogate key of YNAB payee dimension"
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: payee_name
+        description: "The name of the payee"
+        data_type: varchar
+
+unit_tests:
+  - name: test_payee_name_deduplication
+    model: dim_ynab_payee
+    description: "Verify duplicate payee names are removed"
+    given:
+      - input: ref('stg_ynab_registers')
+        rows:
+          - { payee_name: "Avis" }
+          - { payee_name: "Lemon Street Market" }
+          - { payee_name: "Wildflower" }
+          - { payee_name: "Wildflower" }
+    expect:
+      rows:
+        - { dim_ynab_payee_key: '2f3d2d373d556e9b0b98e530b6d28d44', payee_name: "Avis" }
+        - { dim_ynab_payee_key: 'e799b131b0e33e5889f949d0287fd3a5', payee_name: "Lemon Street Market" }
+        - { dim_ynab_payee_key: '668c46ea79ce1dbd3c8180d45a748f34', payee_name: "Wildflower" }
