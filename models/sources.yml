@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: mart_sources
+    schema: mart_sources
+    tables:
+      - name: ynab_registers
+        description: "Raw registers from YNAB"
+      - name: ynab_plans
+        description: "Raw transaction data from YNAB."

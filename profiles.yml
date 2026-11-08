@@ -1,6 +1,7 @@
-depot:
+my-dbt:
+  target: dev
   outputs:
     dev:
       type: duckdb
-      path: md:depot
-  target: dev
+      path: './datamart.duckdb'
+      threads: 4
