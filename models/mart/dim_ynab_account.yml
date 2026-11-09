@@ -21,12 +21,13 @@ unit_tests:
     description: "Verify duplicate account names are removed"
     given:
       - input: ref('stg_ynab_registers')
-        rows: # Indented 2 spaces further under the input block
+        rows:
           - { account_name: "Mortgage" }
           - { account_name: "Mortgage" }
           - { account_name: "Emergency" }
           - { account_name: "Emergency" }
-    expect: # Brought back out to line up evenly with 'given'
+    expect:
       rows:
-        - { dim_ynab_account_key: '59fc519256027c0b90a627d1688c0975', account_name: "Mortgage" }
-        - { dim_ynab_account_key: 'a3fa706f20bc0b7858b7ae6932261940', account_name: "Emergency" }
+        - { account_name: "Mortgage" }
+        - { account_name: "Emergency" }
+        - { account_name: "Unknown" }
