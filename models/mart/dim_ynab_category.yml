@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: dim_ynab_category
+    description: "Type 1 dimension table for YNAB budget categories"    
+    columns:
+      - name: dim_ynab_category_key
+        description: "The surrogate key of YNAB category dimension"
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: category_name
+        description: "The name of the category"
+        data_type: varchar
+      - name: category_group_name
+        description: "The name of the group that the category belongs to in the budget"
+        data_type: varchar
+
+unit_tests:
+  - name: test_category_name_deduplication
+    model: dim_ynab_category
+    description: "Verify duplicate category names are removed"
+    given:
+      - input: ref('stg_ynab_registers')
+        rows:
+          - { category_name: "529", category_group_name: "Investments" }
+          - { category_name: "House Down Payment", category_group_name: "Hidden Categories" }
+          - { category_name: "Rent", category_group_name: "Hidden Categories" }
+          - { category_name: "Rent", category_group_name: "Hidden Categories" }
+    expect:
+      rows:
+        - { category_name: "529", category_group_name: "Investments"}
+        - { category_name: "House Down Payment", category_group_name: "Hidden Categories" }
+        - { category_name: "Rent", category_group_name: "Hidden Categories" }
+        - { category_name: Unknown, category_group_name: Unknown}
