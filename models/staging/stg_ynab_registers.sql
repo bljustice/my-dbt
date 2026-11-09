@@ -22,7 +22,7 @@ cleaned_cte as (
             end 
             , 'Unknown') as payee_name
         , coalesce(memo, 'Unknown') as memo
-        , coalesce(cleared, 'Unknown') as cleared
+        , coalesce(cleared, 'Unknown') as cleared_status
         , replace(inflow, '$', '')::numeric as inflow_usd
         , replace(outflow, '$', '')::numeric as outflow_usd
     from
@@ -38,7 +38,7 @@ agg_cte as (
         , flag
         , payee_name
         , memo
-        , cleared
+        , cleared_status
         , sum(inflow_usd) as inflow_usd
         , sum(outflow_usd) as outflow_usd
     from
@@ -48,7 +48,7 @@ agg_cte as (
 
 final_cte as (
     select 
-        {{ dbt_utils.generate_surrogate_key(["date", "account_name", "category_group_name", "category_name", "payee_name", "memo", "cleared"]) }} as stg_ynab_registers_key
+        {{ dbt_utils.generate_surrogate_key(["date", "account_name", "category_group_name", "category_name", "payee_name", "memo", "cleared_status"]) }} as stg_ynab_registers_key
         , *
     from
         agg_cte
