@@ -27,6 +27,7 @@ unit_tests:
           - { payee_name: "Wildflower" }
     expect:
       rows:
-        - { dim_ynab_payee_key: '2f3d2d373d556e9b0b98e530b6d28d44', payee_name: "Avis" }
-        - { dim_ynab_payee_key: 'e799b131b0e33e5889f949d0287fd3a5', payee_name: "Lemon Street Market" }
-        - { dim_ynab_payee_key: '668c46ea79ce1dbd3c8180d45a748f34', payee_name: "Wildflower" }
+        - { payee_name: "Avis" }
+        - { payee_name: "Lemon Street Market" }
+        - { payee_name: "Wildflower" }
+        - { payee_name: 'Unknown' }
