@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: dim_ynab_transaction_status
+    description: "Junk dimension table for YNAB transaction status"    
+    columns:
+      - name: dim_ynab_transaction_status
+        description: "The surrogate key of YNAB transaction status dimension"
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: cleared_status
+        description: "The status of the transaction"
+        data_type: varchar
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["Cleared", "Reconciled", "Uncleared", "Unknown"]
+      - name: flag
+        description: "The flag linked to the transaction"
+
+unit_tests:
+  - name: test_transaction_status_deduplication
+    model: dim_ynab_transaction_status
+    description: "Verify duplicate status pairings are removed"
+    given:
+      - input: ref('stg_ynab_registers')
+        rows:
+          - { cleared_status: "Cleared", flag: "Unknown" }
+          - { cleared_status: "Reconciled", flag: "Unknown" }
+          - { cleared_status: "Uncleared", flag: "Unknown" }
+          - { cleared_status: "Uncleared", flag: "Unknown" }
+          - { cleared_status: "Reconciled", flag: "Unknown" }
+    expect:
+      rows:
+        - { cleared_status: "Cleared", flag: "Unknown" }
+        - { cleared_status: "Reconciled", flag: "Unknown" }
+        - { cleared_status: "Uncleared", flag: "Unknown" }
+        - { cleared_status: "Unknown", flag: "Unknown" }
