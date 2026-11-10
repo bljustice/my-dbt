@@ -1,0 +1,120 @@
+version: 2
+
+models:
+  - name: fact_ynab_transaction_by_date
+    description: "Fact table for YNAB transactions by day"
+    config:
+      contract:
+        enforced: true
+    data_tests:
+      - dbt_utils.equal_rowcount:
+          arguments:
+            compare_model: ref('stg_ynab_registers')
+
+    columns:
+      - name: stg_ynab_registers_key
+        description: "The surrogate key of the fact table"
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: dim_date_key
+        description: "Primary key from dim_date"
+        data_type: number
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: dim_date_key
+
+      - name: dim_ynab_account_key
+        description: "Primary key from dim_ynab_account"
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_ynab_account')
+                field: dim_ynab_account_key
+
+      - name: dim_ynab_category_key
+        description: "Primary key from dim_ynab_category"
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_ynab_category')
+                field: dim_ynab_category_key
+
+      - name: dim_ynab_transaction_status_key
+        description: "Primary key from dim_ynab_transaction_status"
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_ynab_transaction_status')
+                field: dim_ynab_transaction_status_key
+
+      - name: memo
+        description: "The memo for the transaction stored as a degenerate dimension"
+        data_type: varchar
+
+      - name: outflow_usd
+        description: "The amount of money that was paid for the transaction in USD"
+        data_type: number
+
+      - name: inflow_usd
+        description: "The amount of money that was received from the transaction in USD"
+        data_type: number
+        
+unit_tests:
+  - name: test_fact_ynab_transaction_by_date_joins_and_fallbacks
+    model: fact_ynab_transaction_by_date
+    given:
+      - input: ref('stg_ynab_registers')
+        rows:
+          # r1: everything matches
+          - {stg_ynab_registers_key: r1, date: '2024-01-05', account_name: Checking, category_name: Groceries, category_group_name: Everyday Expenses, cleared_status: Cleared, flag: None, memo: 'weekly shop', outflow_usd: 50.00, inflow_usd: 0}
+          # r2: same content as r1, different key (true duplicate must survive)
+          - {stg_ynab_registers_key: r2, date: '2024-01-05', account_name: Checking, category_name: Groceries, category_group_name: Everyday Expenses, cleared_status: Cleared, flag: None, memo: 'weekly shop', outflow_usd: 50.00, inflow_usd: 0}
+          # r3: date missing from dim_date -> date key -1 only
+          - {stg_ynab_registers_key: r3, date: '2024-02-01', account_name: Checking, category_name: Groceries, category_group_name: Everyday Expenses, cleared_status: Cleared, flag: None, memo: '', outflow_usd: 10.00, inflow_usd: 0}
+          # r4: account missing from dim_account -> account key '-1' only
+          - {stg_ynab_registers_key: r4, date: '2024-01-06', account_name: Brokerage, category_name: Rent, category_group_name: Bills, cleared_status: Cleared, flag: None, memo: '', outflow_usd: 0, inflow_usd: 200.00}
+          # r5: category_name exists but under a different group -> category key '-1'
+          - {stg_ynab_registers_key: r5, date: '2024-01-06', account_name: Savings, category_name: Groceries, category_group_name: Bills, cleared_status: Cleared, flag: None, memo: '', outflow_usd: 5.00, inflow_usd: 0}
+          # r6: cleared_status exists but flag combo does not -> status key '-1'
+          - {stg_ynab_registers_key: r6, date: '2024-01-06', account_name: Savings, category_name: Rent, category_group_name: Bills, cleared_status: Cleared, flag: Blue, memo: '', outflow_usd: 1.00, inflow_usd: 0}
+
+      - input: ref('dim_date')
+        rows:
+          - {date: '2024-01-05', dim_date_key: 20240105}
+          - {date: '2024-01-06', dim_date_key: 20240106}
+
+      - input: ref('dim_ynab_account')
+        rows:
+          - {account_name: Checking, dim_ynab_account_key: acct_1}
+          - {account_name: Savings, dim_ynab_account_key: acct_2}
+
+      - input: ref('dim_ynab_category')
+        rows:
+          - {category_name: Groceries, category_group_name: Everyday Expenses, dim_ynab_category_key: cat_1}
+          - {category_name: Rent, category_group_name: Bills, dim_ynab_category_key: cat_2}
+
+      - input: ref('dim_ynab_transaction_status')
+        rows:
+          - {cleared_status: Cleared, flag: None, dim_ynab_transaction_status_key: ts_1}
+          - {cleared_status: Cleared, flag: Red, dim_ynab_transaction_status_key: ts_2}
+
+    expect:
+      rows:
+        - {stg_ynab_registers_key: r1, dim_date_key: 20240105, dim_ynab_account_key: acct_1, dim_ynab_category_key: cat_1, dim_ynab_transaction_status_key: ts_1, memo: 'weekly shop', outflow_usd: 50.00, inflow_usd: 0}
+        - {stg_ynab_registers_key: r2, dim_date_key: 20240105, dim_ynab_account_key: acct_1, dim_ynab_category_key: cat_1, dim_ynab_transaction_status_key: ts_1, memo: 'weekly shop', outflow_usd: 50.00, inflow_usd: 0}
+        - {stg_ynab_registers_key: r3, dim_date_key: -1,       dim_ynab_account_key: acct_1, dim_ynab_category_key: cat_1, dim_ynab_transaction_status_key: ts_1, memo: '', outflow_usd: 10.00, inflow_usd: 0}
+        - {stg_ynab_registers_key: r4, dim_date_key: 20240106, dim_ynab_account_key: '-1',   dim_ynab_category_key: cat_2, dim_ynab_transaction_status_key: ts_1, memo: '', outflow_usd: 0, inflow_usd: 200.00}
+        - {stg_ynab_registers_key: r5, dim_date_key: 20240106, dim_ynab_account_key: acct_2, dim_ynab_category_key: '-1',   dim_ynab_transaction_status_key: ts_1, memo: '', outflow_usd: 5.00, inflow_usd: 0}
+        - {stg_ynab_registers_key: r6, dim_date_key: 20240106, dim_ynab_account_key: acct_2, dim_ynab_category_key: cat_2, dim_ynab_transaction_status_key: '-1', memo: '', outflow_usd: 1.00, inflow_usd: 0}
