@@ -1,11 +1,11 @@
 version: 2
 
 models:
-  - name: dim_ynab_transition_status
-    description: "Junk dimension table for YNAB cleared status and flag pairings"    
+  - name: dim_ynab_transaction_status
+    description: "Junk dimension table for YNAB transaction status"    
     columns:
-      - name: dim_ynab_transition_status
-        description: "The surrogate key of YNAB transition status dimension"
+      - name: dim_ynab_transaction_status
+        description: "The surrogate key of YNAB transaction status dimension"
         data_type: varchar
         tests:
           - unique
@@ -22,7 +22,7 @@ models:
 
 unit_tests:
   - name: test_transaction_status_deduplication
-    model: dim_ynab_transition_status
+    model: dim_ynab_transaction_status
     description: "Verify duplicate status pairings are removed"
     given:
       - input: ref('stg_ynab_registers')
