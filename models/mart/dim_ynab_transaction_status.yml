@@ -4,7 +4,7 @@ models:
   - name: dim_ynab_transaction_status
     description: "Junk dimension table for YNAB transaction status"    
     columns:
-      - name: dim_ynab_transaction_status
+      - name: dim_ynab_transaction_status_key
         description: "The surrogate key of YNAB transaction status dimension"
         data_type: varchar
         tests:
