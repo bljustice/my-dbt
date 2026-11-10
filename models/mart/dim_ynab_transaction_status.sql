@@ -21,21 +21,21 @@ unique_pairings_cte as (
 
 unknown_pairing_cte as (
     select
-        '-1' as dim_transaction_status_key
+        '-1' as dim_ynab_transaction_status_key
         , 'Unknown' as cleared_status
         , 'Unknown' as flag
 ),
 
 final_cte as (
     select
-        {{ dbt_utils.generate_surrogate_key(['cleared_status', 'flag']) }} as dim_transaction_status_key
+        {{ dbt_utils.generate_surrogate_key(['cleared_status', 'flag']) }} as dim_ynab_transaction_status_key
         , cleared_status
         , flag
     from
         unique_pairings_cte
     union all
     select
-        dim_transaction_status_key
+        dim_ynab_transaction_status_key
         , cleared_status
         , flag
     from
