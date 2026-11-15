@@ -22,6 +22,7 @@ models:
                 values: ["Cleared", "Reconciled", "Uncleared", "Unknown"]
       - name: flag
         description: "The flag linked to the transaction"
+        data_type: varchar
 
 unit_tests:
   - name: test_transaction_status_deduplication

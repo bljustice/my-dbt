@@ -16,7 +16,6 @@ models:
       - name: account_name
         description: "The name of the account"
         data_type: varchar
-      - name: category_group
 
 unit_tests:
   - name: test_account_name_deduplication

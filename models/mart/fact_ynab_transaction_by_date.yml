@@ -21,7 +21,7 @@ models:
 
       - name: dim_date_key
         description: "Primary key from dim_date"
-        data_type: number
+        data_type: integer
         data_tests:
           - not_null
           - relationships:
@@ -65,11 +65,11 @@ models:
 
       - name: outflow_usd
         description: "The amount of money that was paid for the transaction in USD"
-        data_type: number
+        data_type: decimal(38,3)
 
       - name: inflow_usd
         description: "The amount of money that was received from the transaction in USD"
-        data_type: number
+        data_type: decimal(38,3)
         
 unit_tests:
   - name: test_fact_ynab_transaction_by_date_joins_and_fallbacks
