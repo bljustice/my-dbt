@@ -25,10 +25,17 @@ clean-targets:         # directories to be removed by `dbt clean`
   - "dbt_packages"
 
 models:
-  my-dbt:
+  my-dbt: 
+
     staging:
       +schema: staging
       +tags: [staging]
+
     mart:
       +schema: mart
       +tags: [mart]
+
+    reporting:
+      +schema: reporting
+      +tags: [reporting]
+    

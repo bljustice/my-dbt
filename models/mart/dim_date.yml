@@ -1,0 +1,135 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: >
+      Calendar dimension with one row per day from 2015-01-01 through 2030-12-31,
+      plus an unknown row (dim_date_key = -1) for facts with no matching date.
+    config:
+      contract:
+        enforced: true
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "dim_date_key = strftime(date, '%Y%m%d')::int"
+          config:
+            where: "dim_date_key <> -1"
+
+    columns:
+      - name: dim_date_key
+        description: "Primary key in yyyymmdd integer form (e.g. 20240105). -1 is the unknown row."
+        data_type: integer
+        data_tests:
+          - unique
+          - not_null
+
+      - name: date
+        description: "The calendar date. The unknown row uses the placeholder 1900-01-01."
+        data_type: date
+        data_tests:
+          - unique
+          - not_null
+
+      - name: year_number
+        description: "Four-digit calendar year. Null on the unknown row."
+        data_type: bigint
+        data_tests:
+          - not_null:
+              config:
+                where: "dim_date_key <> -1"
+
+      - name: quarter_number
+        description: "Calendar quarter (1-4). Null on the unknown row."
+        data_type: bigint
+        data_tests:
+          - not_null:
+              config:
+                where: "dim_date_key <> -1"
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+                quote: false
+              config:
+                where: "dim_date_key <> -1"
+
+      - name: month_number
+        description: "Calendar month (1-12). Null on the unknown row."
+        data_type: bigint
+        data_tests:
+          - not_null:
+              config:
+                where: "dim_date_key <> -1"
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                quote: false
+              config:
+                where: "dim_date_key <> -1"
+
+      - name: day_of_month
+        description: "Day of the month (1-31). Null on the unknown row."
+        data_type: bigint
+        data_tests:
+          - not_null:
+              config:
+                where: "dim_date_key <> -1"
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+                max_value: 31
+              config:
+                where: "dim_date_key <> -1"
+
+      - name: week_of_year
+        description: "ISO week number (1-53). Null on the unknown row."
+        data_type: bigint
+        data_tests:
+          - not_null:
+              config:
+                where: "dim_date_key <> -1"
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+                max_value: 53
+              config:
+                where: "dim_date_key <> -1"
+
+      - name: is_weekend
+        description: "True for Saturday and Sunday. False on the unknown row."
+        data_type: boolean
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+
+      - name: day_name
+        description: "Full weekday name (e.g. Monday). 'Unknown' on the unknown row."
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Unknown']
+
+      - name: month_name
+        description: "Full month name (e.g. January). 'Unknown' on the unknown row."
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December', 'Unknown']
+
+      - name: first_day_of_month
+        description: "First calendar day of the month containing the date."
+        data_type: date
+        data_tests:
+          - not_null
+
+      - name: last_day_of_month
+        description: "Last calendar day of the month containing the date."
+        data_type: date
+        data_tests:
+          - not_null
