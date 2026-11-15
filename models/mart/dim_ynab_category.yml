@@ -2,7 +2,10 @@ version: 2
 
 models:
   - name: dim_ynab_category
-    description: "Type 1 dimension table for YNAB budget categories"    
+    description: "Type 1 dimension table for YNAB budget categories"
+    config:
+      contract:
+        enforced: true
     columns:
       - name: dim_ynab_category_key
         description: "The surrogate key of YNAB category dimension"

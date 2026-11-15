@@ -2,7 +2,10 @@ version: 2
 
 models:
   - name: stg_ynab_plans
-    description: "Staging table for YNAB plans"    
+    description: "Staging table for YNAB plans"
+    config:
+      contract:
+        enforced: true    
     columns:
       - name: stg_ynab_plans_key
         description: "The primary key of the stg_ynab_plans table."
@@ -21,10 +24,10 @@ models:
         data_type: varchar
       - name: assigned_amount_usd
         description: "The amount of money that was assigned to the category in USD"
-        data_type: number
+        data_type: decimal(18,3)
       - name: activity_amount_usd
         description: "The amount of money that was gained or spent on the category in USD"
-        data_type: number
+        data_type: decimal(18,3)
       - name: available_amount_usd
         description: "The amount of money available to spend on the category in USD"
-        data_type: number
+        data_type: decimal(18,3)

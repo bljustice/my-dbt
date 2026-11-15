@@ -2,7 +2,10 @@ version: 2
 
 models:
   - name: stg_ynab_registers
-    description: "Staging table for YNAB registers"    
+    description: "Staging table for YNAB registers"
+    config:
+      contract:
+        enforced: true    
     columns:
       - name: stg_ynab_registers_key
         description: "The primary key of the stg_ynab_registers table."
@@ -16,22 +19,22 @@ models:
       - name: account_name
         description: "The account name of the register."
         data_type: varchar
-      - name: category_group
+      - name: category_group_name
         description: "The category group of the register."
         data_type: varchar
-      - name: category
+      - name: category_name
         description: "The category of the register."
         data_type: varchar
       - name: flag
         description: "The flag added to the register"
         data_type: varchar
-      - name: payee
+      - name: payee_name
         description: "The entity linked to the exchange record"
         data_type: varchar
       - name: memo
         description: "The memo linked to the register"
         data_type: varchar
-      - name: cleared
+      - name: cleared_status
         description: "Whether or not the line item was cleared"
         data_type: varchar
       - name: inflow_usd

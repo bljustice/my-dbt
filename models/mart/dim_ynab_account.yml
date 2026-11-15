@@ -2,7 +2,10 @@ version: 2
 
 models:
   - name: dim_ynab_account
-    description: "Type 1 dimension table for YNAB accounts"    
+    description: "Type 1 dimension table for YNAB accounts"  
+    config:
+      contract:
+        enforced: true
     columns:
       - name: dim_ynab_account_key
         description: "The surrogate key of YNAB account dimension"
@@ -13,7 +16,6 @@ models:
       - name: account_name
         description: "The name of the account"
         data_type: varchar
-      - name: category_group
 
 unit_tests:
   - name: test_account_name_deduplication
