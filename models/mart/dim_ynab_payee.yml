@@ -2,7 +2,10 @@ version: 2
 
 models:
   - name: dim_ynab_payee
-    description: "Type 1 dimension table for YNAB payees"    
+    description: "Type 1 dimension table for YNAB payees"
+    config:
+      contract:
+        enforced: true 
     columns:
       - name: dim_ynab_payee_key
         description: "The surrogate key of YNAB payee dimension"

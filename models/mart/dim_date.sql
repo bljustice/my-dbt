@@ -29,7 +29,7 @@ enriched_cte as (
         , extract(isodow from full_date) in (6,7) as is_weekend
         , dayname(full_date) as day_name
         , monthname(full_date) as month_name
-        , date_trunc('month', full_date) as first_day_of_month
+        , date_trunc('month', full_date)::date as first_day_of_month
         , last_day(full_date) as last_day_of_month
     from
         calendar_cte

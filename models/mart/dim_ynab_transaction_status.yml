@@ -2,7 +2,10 @@ version: 2
 
 models:
   - name: dim_ynab_transaction_status
-    description: "Junk dimension table for YNAB transaction status"    
+    description: "Junk dimension table for YNAB transaction status"
+    config:
+      contract:
+        enforced: true
     columns:
       - name: dim_ynab_transaction_status_key
         description: "The surrogate key of YNAB transaction status dimension"
