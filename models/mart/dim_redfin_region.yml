@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: dim_redfin_region
+    description: "Type 1 dimension table for Redfin regions"
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: dim_redfin_region_key
+        description: "The surrogate key of the Redfin region dimension"
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+      - name: region_id
+        description: "Redfin's identifier for the region"
+        data_type: bigint
+        data_tests:
+          - unique
+          - not_null
+      - name: region_name
+        description: "The most recent name of the region"
+        data_type: varchar
+      - name: region_type
+        description: "The most recent type of the region, such as Metro"
+        data_type: varchar
+
+unit_tests:
+  - name: test_region_keeps_latest_name
+    model: dim_redfin_region
+    description: "Verify each region appears once with its most recent name"
+    given:
+      - input: ref('stg_redfin_housing_market_tracker')
+        rows:
+          - { region_id: 1, region_name: "Old Name, TX", region_type: "Metro", start_date: "2026-01-01" }
+          - { region_id: 1, region_name: "New Name, TX", region_type: "Metro", start_date: "2026-02-01" }
+          - { region_id: 2, region_name: "Austin, TX", region_type: "Metro", start_date: "2026-01-01" }
+    expect:
+      rows:
+        - { region_id: 1, region_name: "New Name, TX" }
+        - { region_id: 2, region_name: "Austin, TX" }
+        - { region_id: -1, region_name: "Unknown" }

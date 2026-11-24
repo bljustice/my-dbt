@@ -1,0 +1,139 @@
+version: 2
+
+models:
+  - name: fact_redfin_housing_market_by_month
+    description: >
+      Periodic snapshot fact of Redfin housing market measures. One row per region, per month,
+      per seasonal adjustment. Some regions have both a seasonally adjusted and a not seasonally
+      adjusted row each month, so always filter or group on is_seasonally_adjusted before summing.
+    config:
+      contract:
+        enforced: true
+    data_tests:
+      - dbt_utils.equal_rowcount:
+          arguments:
+            compare_model: ref('stg_redfin_housing_market_tracker')
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - dim_date_key
+              - dim_redfin_region_key
+              - is_seasonally_adjusted
+
+    columns:
+      - name: stg_redfin_housing_market_tracker_key
+        description: "The surrogate key of the fact table"
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: dim_date_key
+        description: "Primary key from dim_date for the first day of the month"
+        data_type: integer
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: dim_date_key
+
+      - name: dim_redfin_region_key
+        description: "Primary key from dim_redfin_region"
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_redfin_region')
+                field: dim_redfin_region_key
+
+      - name: frequency
+        description: "How often the measures are reported, such as Monthly. Degenerate dimension."
+        data_type: varchar
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Monthly']
+
+      - name: is_seasonally_adjusted
+        description: "Whether or not the measures are seasonally adjusted. Degenerate dimension. Filter on this before summing."
+        data_type: boolean
+        data_tests:
+          - not_null
+
+      - name: homes_sold_count
+        description: "The number of homes sold in the month. Additive."
+        data_type: integer
+      - name: new_home_listing_count
+        description: "The number of homes newly listed in the month. Additive."
+        data_type: integer
+      - name: pending_home_sales_count
+        description: "The number of homes that went under contract in the month. Additive."
+        data_type: integer
+      - name: active_home_listing_count
+        description: "The number of homes listed for sale in the month. Semi-additive: sum across regions, not across months."
+        data_type: integer
+      - name: median_sale_price_nsa
+        description: "The median sale price in USD, not seasonally adjusted. Non-additive."
+        data_type: decimal(18,2)
+      - name: median_days_on_market_count
+        description: "The median number of days homes were on the market before going under contract. Non-additive."
+        data_type: integer
+      - name: median_new_listing_price_per_square_foot
+        description: "The median list price per square foot of new listings in USD. Non-additive."
+        data_type: decimal(18,2)
+      - name: pct_homes_sold_yoy_change
+        description: "The year over year percent change in homes sold. Non-additive."
+        data_type: decimal(18,2)
+      - name: pct_median_sale_price_yoy_change
+        description: "The year over year percent change in median sale price. Non-additive."
+        data_type: decimal(18,2)
+      - name: median_days_on_market_yoy_change
+        description: "The year over year change in median days on market, in days. Non-additive."
+        data_type: integer
+      - name: pct_new_listings_yoy_change
+        description: "The year over year percent change in new listings. Non-additive."
+        data_type: decimal(18,2)
+      - name: pct_active_listings_yoy_change
+        description: "The year over year percent change in active listings. Non-additive."
+        data_type: decimal(18,2)
+      - name: pct_pending_sales_yoy_change
+        description: "The year over year percent change in pending sales. Non-additive."
+        data_type: decimal(18,2)
+      - name: pct_median_new_listing_price_per_square_foot_yoy_change
+        description: "The year over year percent change in median list price per square foot of new listings. Non-additive."
+        data_type: decimal(18,2)
+      - name: redfin_last_updated_date
+        description: "The date Redfin last updated the data, kept for auditing"
+        data_type: date
+
+unit_tests:
+  - name: test_fact_redfin_housing_market_by_month_joins_and_fallbacks
+    model: fact_redfin_housing_market_by_month
+    given:
+      - input: ref('stg_redfin_housing_market_tracker')
+        rows:
+          # h1: everything matches
+          - {stg_redfin_housing_market_tracker_key: h1, start_date: '2026-01-01', region_id: 1, frequency: Monthly, is_seasonally_adjusted: false, homes_sold_count: 10}
+          # h2: same region and month, seasonally adjusted -> separate row, flag carried through
+          - {stg_redfin_housing_market_tracker_key: h2, start_date: '2026-01-01', region_id: 1, frequency: Monthly, is_seasonally_adjusted: true, homes_sold_count: 11}
+          # h3: month missing from dim_date -> date key -1 only
+          - {stg_redfin_housing_market_tracker_key: h3, start_date: '2030-12-01', region_id: 1, frequency: Monthly, is_seasonally_adjusted: false, homes_sold_count: 12}
+          # h4: region missing from dim_redfin_region -> region key '-1' only
+          - {stg_redfin_housing_market_tracker_key: h4, start_date: '2026-01-01', region_id: 99, frequency: Monthly, is_seasonally_adjusted: false, homes_sold_count: 13}
+
+      - input: ref('dim_date')
+        rows:
+          - {date: '2026-01-01', dim_date_key: 20260101}
+
+      - input: ref('dim_redfin_region')
+        rows:
+          - {region_id: 1, dim_redfin_region_key: reg_1}
+
+    expect:
+      rows:
+        - {stg_redfin_housing_market_tracker_key: h1, dim_date_key: 20260101, dim_redfin_region_key: reg_1, frequency: Monthly, is_seasonally_adjusted: false,  homes_sold_count: 10}
+        - {stg_redfin_housing_market_tracker_key: h2, dim_date_key: 20260101, dim_redfin_region_key: reg_1, frequency: Monthly, is_seasonally_adjusted: true,  homes_sold_count: 11}
+        - {stg_redfin_housing_market_tracker_key: h3, dim_date_key: -1,       dim_redfin_region_key: reg_1, frequency: Monthly, is_seasonally_adjusted: false,  homes_sold_count: 12}
+        - {stg_redfin_housing_market_tracker_key: h4, dim_date_key: 20260101, dim_redfin_region_key: '-1',  frequency: Monthly, is_seasonally_adjusted: false,  homes_sold_count: 13}
