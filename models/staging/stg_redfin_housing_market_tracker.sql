@@ -12,7 +12,7 @@ cleanse_cte as (
         "PERIOD BEGIN" as start_date
         , "PERIOD END" as end_date
         , "REGION ID" as region_id
-        , "REGION NAME" as region_name
+        , replace("REGION NAME", 'metro area', '') as region_name
         , "REGION TYPE" as region_type
         , nullif("HOMES SOLD", 'NA')::integer as homes_sold_count
         , nullif("MEDIAN SALE PRICE NSA ($)", 'NA')::decimal(18,2) as median_sale_price_nsa
