@@ -1,0 +1,87 @@
+version: 2
+
+models:
+  - name: stg_redfin_housing_market_tracker
+    description: "Staging table for the Redfin housing market tracker. One row per metro, per month, per seasonal adjustment flag."
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: stg_redfin_housing_market_tracker_key
+        description: "The primary key of the stg_redfin_housing_market_tracker table, built from start_date, region_id and is_seasonally_adjusted."
+        data_type: varchar
+        tests:
+          - unique
+          - not_null
+      - name: start_date
+        description: "The first day of the period the metrics cover."
+        data_type: date
+        tests:
+          - not_null
+      - name: end_date
+        description: "The last day of the period the metrics cover."
+        data_type: date
+      - name: region_id
+        description: "Redfin's identifier for the region."
+        data_type: bigint
+        tests:
+          - not_null
+      - name: region_name
+        description: "The name of the region."
+        data_type: varchar
+      - name: region_type
+        description: "The type of region, such as Metro."
+        data_type: varchar
+      - name: homes_sold_count
+        description: "The number of homes sold in the period."
+        data_type: varchar
+      - name: median_sale_price_nsa
+        description: "The median sale price in USD, not seasonally adjusted."
+        data_type: varchar
+      - name: median_days_on_market_count
+        description: "The median number of days homes were on the market before going under contract."
+        data_type: varchar
+      - name: new_home_listing_count
+        description: "The number of homes newly listed in the period."
+        data_type: varchar
+      - name: active_home_listing_count
+        description: "The number of homes listed for sale in the period."
+        data_type: varchar
+      - name: pending_home_sales_count
+        description: "The number of homes that went under contract in the period."
+        data_type: varchar
+      - name: median_new_listing_price_per_square_foot
+        description: "The median list price per square foot of new listings in USD."
+        data_type: varchar
+      - name: frequency
+        description: "How often the metrics are reported, such as Monthly."
+        data_type: varchar
+      - name: is_seasonally_adjusted
+        description: "Whether or not the metrics are seasonally adjusted. Only some regions have seasonally adjusted rows."
+        data_type: boolean
+        tests:
+          - not_null
+      - name: pct_homes_sold_yoy_change
+        description: "The year over year percent change in homes sold."
+        data_type: varchar
+      - name: pct_median_sale_price_yoy_change
+        description: "The year over year percent change in median sale price."
+        data_type: varchar
+      - name: median_days_on_market_yoy_change
+        description: "The year over year change in median days on market, in days."
+        data_type: varchar
+      - name: pct_new_listings_yoy_change
+        description: "The year over year percent change in new listings."
+        data_type: varchar
+      - name: pct_active_listings_yoy_change
+        description: "The year over year percent change in active listings."
+        data_type: varchar
+      - name: pct_pending_sales_yoy_change
+        description: "The year over year percent change in pending sales."
+        data_type: varchar
+      - name: pct_median_new_listing_price_per_square_foot_yoy_change
+        description: "The year over year percent change in median list price per square foot of new listings."
+        data_type: varchar
+      - name: redfin_last_updated_date
+        description: "The date Redfin last updated the data."
+        data_type: date

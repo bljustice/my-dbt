@@ -4,6 +4,10 @@ sources:
   - name: mart_sources
     schema: mart_sources
     tables:
+      - name: redfin_housing_market_tracker
+        description: >
+          "Snapshot of Redfin housing metro area data for the 2026-01-01 
+          to 2026-10-01 timeframe"
       - name: ynab_registers
         description: "Raw registers from YNAB"
       - name: ynab_plans
